@@ -86,6 +86,12 @@ public class SparkCommandBuilderImpl extends CommandBuilderImplBase implements S
     }
 
     @Override
+    public SparkCommandBuilder scriptLocation(String scriptLocation) {
+        node.put("script_location", scriptLocation);
+        return this;
+    }
+
+    @Override
     protected ObjectNode getEntity()
     {
         return node;
