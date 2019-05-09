@@ -76,4 +76,10 @@ public interface SparkCommandBuilder extends InvokableBuilder<CommandResponse>
      * from the commands list in the Commands History.
      */
     public SparkCommandBuilder tags(String[] queryTags);
+    
+    /**
+     * Specify an S3 path where the Spark query (Scala, Python, SQL, R, and Command Line) script is stored.
+     */
+    public SparkCommandBuilder scriptLocation(String scriptLocation);
+
 }
