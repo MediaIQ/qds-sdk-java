@@ -1,13 +1,12 @@
 package com.qubole.qds.sdk.java.client;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
+import org.glassfish.jersey.message.internal.ReaderWriter;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import javax.ws.rs.core.Response;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.logging.Logger;
 
 public class ErrorResponseFilter implements ClientResponseFilter {
@@ -21,16 +20,28 @@ public class ErrorResponseFilter implements ClientResponseFilter {
             // For non-200 response, log the custom error message.
             if (responseContext.getStatus() != Response.Status.OK.getStatusCode()) {
                 if (responseContext.hasEntity()) {
-                    String error = CharStreams.toString(
-                        new InputStreamReader(responseContext.getEntityStream(), Charsets.UTF_8));
-                    LOG.severe(error);
-                    System.err.println(error);
+                    InputStream in = responseContext.getEntityStream();
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    if (in.available() > 0) {
+                        ReaderWriter.writeTo(in, out);
+                        byte[] responseEntity = out.toByteArray();
+                        printEntity(responseEntity);
+                        responseContext.setEntityStream(new ByteArrayInputStream(responseEntity));
+                    }
                 }
             }
         } catch (Exception e) {
             // Silently pass. We don't want anything to fail because of this filter.
             LOG.warning("Error while checking response code: " + e.getMessage());
         }
+    }
+
+    private void printEntity(byte[] entity) throws IOException {
+        if (entity.length == 0)
+            return;
+        String error = new String(entity);
+        LOG.severe(error);
+        System.err.println(error);
     }
 
 }
